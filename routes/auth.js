@@ -3,11 +3,12 @@ const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
+const fetchUser = require("../middleware/fetchUser");
 
 const router = express.Router();
 const AUTH_SECRET = "$Cloudbook$Mern";
 
-// POST METHOD for /cloudbook/auth/createuser. No login required
+//ROUTE 1: Post method for /cloudbook/auth/createuser. No login required
 router.post(
   "/createuser",
   [
@@ -42,23 +43,25 @@ router.post(
 
       //Making JWT Token
       const tokenData = {
-        email: user.email,
+        user: {
+          id: user.id
+        }
       };
       let authToken = jwt.sign(tokenData, AUTH_SECRET);
       //Sending JWT Token to user to authenticate
       res.json({ authToken });
 
       // res.json(user);
-    } catch (err) {
+    } catch (error) {
       res
         .status(500)
-        .json({ error: "Internal Server Error", message: err.message });
-      console.error(err.message);
+        .json({ error: "Internal Server Error", message: error.message });
+      console.error(error.message);
     }
   }
 );
 
-// POST METHOD for /cloudbook/auth/login. No login required
+//ROUTE 2: Post Method for /cloudbook/auth/login. No login required
 router.post(
   "/login",
   [
@@ -88,7 +91,9 @@ router.post(
 
       //Making JWT Token
       const tokenData = {
-        email: user.email,
+        user:{
+          id: user.id
+        }
       };
       let authToken = jwt.sign(tokenData, AUTH_SECRET);
 
@@ -97,9 +102,27 @@ router.post(
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Internal Server Error", message: err.message });
-      console.error(err.message);
+        .json({ error: "Internal Server Error", message: error.message });
+      console.error(error.message);
     }
   }
 );
+
+//ROUTE 3: Post Method for /cloudbook/auth/getuser. Login required
+router.post("/getuser", fetchUser, async (req, res) => {
+  try {
+    //Fetch user id from data sent by middleware (fetchUser)
+    let userId = req.user.id;
+    //Select user data (except password) fron database using userId
+    const user = await User.findById(userId).select("-password");
+    //Send user received as response
+    res.json(user);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: error.message });
+    console.error(error.message);
+  }
+});
+
 module.exports = router;

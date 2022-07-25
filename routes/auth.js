@@ -8,7 +8,7 @@ const fetchUser = require("../middleware/fetchUser");
 const router = express.Router();
 const AUTH_SECRET = "$Cloudbook$Mern";
 
-//ROUTE 1: Post method for /cloudbook/auth/createuser. No login required
+//ENDPOINT 1: Post method for /cloudbook/auth/createuser. No login required
 router.post(
   "/createuser",
   [
@@ -61,7 +61,7 @@ router.post(
   }
 );
 
-//ROUTE 2: Post Method for /cloudbook/auth/login. No login required
+//ENDPOINT 2: Post Method for /cloudbook/auth/login. No login required
 router.post(
   "/login",
   [
@@ -108,7 +108,7 @@ router.post(
   }
 );
 
-//ROUTE 3: Post Method for /cloudbook/auth/getuser. Login required
+//ENDPOINT 3: Post Method for /cloudbook/auth/getuser. Login required
 router.post("/getuser", fetchUser, async (req, res) => {
   try {
     //Fetch user id from data sent by middleware (fetchUser)

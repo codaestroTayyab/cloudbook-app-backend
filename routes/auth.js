@@ -2,8 +2,10 @@ const express = require("express");
 const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
 
 const router = express.Router();
+const AUTH_SECRET = "$Cloudbook$Mern"
 
 // POST METHOD for /cloudbook/auth/createuser. No login required
 router.post(
@@ -37,7 +39,16 @@ router.post(
         email: req.body.email,
         password: securedPass,
       });
-      res.json(user);
+
+      //Making JWT Token
+      const tokenData = {
+          email: user.email
+      }
+      let authToken = jwt.sign(tokenData, AUTH_SECRET);
+      //Sending JWT Token to user to authenticate
+      res.json({authToken});
+
+      // res.json(user);
     } catch (err) {
       res
         .status(500)

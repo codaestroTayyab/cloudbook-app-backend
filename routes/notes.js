@@ -39,12 +39,15 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
       //Getting notes details using destructuring from request body
-      let {title, description, tag} = req.body;
-      //Create new note and save in database
-      const note =  await Note.create({
-        title, description, tag, user: req.user.id
-      })
-      
+      let { title, description, tag } = req.body;
+      //Creates new note and save in database
+      const note = await Note.create({
+        title,
+        description,
+        tag,
+        user: req.user.id,
+      });
+
       res.json(note);
     } catch (error) {
       //If any error occurs, Bad Request 500 and custom message
@@ -55,5 +58,54 @@ router.post(
     }
   }
 );
+
+//ENDPOINT 3: Patch Method for /cloudbook/notes/updatenote. Login required
+router.patch("/updatenote/:id", fetchUser, async (req, res) => {
+  try {
+    //Get notes details using destructing from request body
+    let { title, description, tag } = req.body;
+    //Create a newNote using the details passed
+    let newNote = {};
+    if (title) {
+      newNote.title = title;
+    }
+    if (description) {
+      newNote.description = description;
+    }
+    if (tag) {
+      newNote.tag = tag;
+    }
+
+    //Checks if the note exist the one user trying to access
+    let note = await Note.findOne({ id: req.params.id });
+    if (!note) {
+      return res.status(404).json({ error: "Note not found" });
+    }
+    //Checks if the note's user is same as the logged-in user
+    if (note.user.toString() !== req.user.id) {
+      return res.status(401).json({ error: "Not allowed to update this note" });
+    }
+    //Updates the note by finding it's id
+    note = await Note.findByIdAndUpdate(
+      req.params.id,
+      { $set: newNote },
+      { new: true }
+    );
+
+    //Send the updated note as json response
+    res.json(note);
+  } catch (error) {
+    //If any error occurs, Bad Request 500 and custom message
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: error.message });
+    console.error(error.message);
+  }
+});
+
+//ENDPOINT 4: Delete Method for /cloudbook/notes/deletenote. Login required
+router.delete("/deletenote/:id", fetchUser, async (req, res) => {
+
+});
 
 module.exports = router;

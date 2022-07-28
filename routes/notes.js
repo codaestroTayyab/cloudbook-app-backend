@@ -77,7 +77,7 @@ router.patch("/updatenote/:id", fetchUser, async (req, res) => {
     }
 
     //Checks if the note exist the one user trying to access
-    let note = await Note.findOne({ id: req.params.id });
+    let note = await Note.findOne({ _id: req.params.id });
     if (!note) {
       return res.status(404).json({ error: "Note not found" });
     }
@@ -105,7 +105,31 @@ router.patch("/updatenote/:id", fetchUser, async (req, res) => {
 
 //ENDPOINT 4: Delete Method for /cloudbook/notes/deletenote. Login required
 router.delete("/deletenote/:id", fetchUser, async (req, res) => {
+  try {
 
+    //Checks if the note exist the one user trying to delete
+    let note = await Note.findOne({ _id: req.params.id });
+    if (!note) {
+      return res.status(404).json({ error: "Note not found" });
+    }
+    //Checks if the note's user is same as the logged-in user
+    if (note.user.toString() !== req.user.id) {
+      return res.status(401).json({ error: "Not allowed to update this note" });
+    }
+    //Deletes the note by finding it's id
+    note = await Note.findByIdAndDelete(req.params.id);
+    //Send success message and deleted note as json response
+    res.json({
+      message: "Success: Note has been deleted",
+      note: note
+    });
+  } catch (error) {
+    //If any error occurs, Bad Request 500 and custom message
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", message: error.message });
+    console.error(error.message);
+  }
 });
 
 module.exports = router;

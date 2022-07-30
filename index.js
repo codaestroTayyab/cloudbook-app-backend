@@ -12,5 +12,5 @@ app.use('/cloudbook/auth', require('./routes/auth'));
 app.use('/cloudbook/notes', require('./routes/notes'));
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Cloudbook app listening on port ${port}`);
 })

@@ -26,7 +26,7 @@ router.post(
   fetchUser,
   [
     //Validating notes field using express validator
-    body("title", "Titile should be at least 3 character").isLength({ min: 3 }),
+    body("title", "Title should be at least 3 character").isLength({ min: 3 }),
     body("description", "Description should be at least 5 character").isLength({
       min: 5,
     }),
